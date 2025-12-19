@@ -1,0 +1,110 @@
+### base config ####
+BASE: &BASE
+    data_dir: '/scratch/group/p.atm170020.000/2DTurbData/results/Re5000_fkx4fky4_r0.1_b20.0/NoSGS/NX256/dt0.0002_IC1/'
+
+    exp_dir: '/scratch/user/u.dp200518/SSL-2DTurb/'
+
+    log_to_screen: !!bool True
+    log_to_wandb: !!bool False #True
+    project: 'SSL-2DTurb'
+    group: 'Dhruvit-base-emulator'
+    name: '0031'
+    diagnostic_logs: !!bool True
+
+    fresh_start: True
+    early_stopping: !!bool False
+
+    save_checkpoint: !!bool True
+    ckpt_epoch_list: [25, 50, 75, 100, 125, 150, 175, 200, 225, 250, 275, 300, 325, 350, 375, 400, 425, 450, 475, 500]
+
+    train_file_range: [200000, 220000]
+    valid_file_range: [310000, 312000]
+    batch_size: 32 
+    target_step: 3
+    num_workers: 8
+    pin_memory: !!bool True
+
+    gpu: !!bool True
+    lr: 5e-4
+    scheduler: 'ReduceLROnPlateau'
+    warmup: !!bool True
+    warmup_startfactor: 0.001 
+    warmup_totaliters: 3
+    weight_decay: 1e-7
+    max_epochs: 500
+    checkpointing: !!bool False #True
+
+    train_tendencies: !!bool False #True
+
+    img_size: 256
+    patch_size: 4
+    num_frames: 2
+    tubelet_size: 2
+    in_chans: 2
+    encoder_embed_dim: 192
+    encoder_depth: 4 #6
+    encoder_num_heads: 4 #6
+    decoder_embed_dim: 96 #192
+    decoder_depth: 4 #6
+    decoder_num_heads: 4 #6
+    mlp_ratio: 4.
+    num_out_frames: 1
+    patch_recovery: "subpixel_conv"  #["linear", "conv", "subpixel_conv"]
+
+    mae_finetune: False
+
+
+MAE_PRETRAIN: &MAE_PRETRAIN
+    <<: *BASE
+
+    log_to_screen: !!bool True
+    log_to_wandb: !!bool False #True
+    project: 'SSL-2DTurb'
+    group: 'Dhruvit-mae-pretrain'
+    name: '0006'
+    diagnostic_logs: !!bool True
+
+    ckpt_epoch_list: []
+
+    target_step: 3
+    target_step_hist: 3
+
+    train_file_range: [200000, 220000]
+    valid_file_range: [310000, 312000]
+
+    num_frames: 2
+    tubelet_size: 2
+    num_out_frames: 2  
+
+    mask_ratio: 0.9
+
+
+
+MAE_FINETUNE: &MAE_FINETUNE
+    <<: *MAE_PRETRAIN
+
+    log_to_screen: !!bool True
+    log_to_wandb: !!bool False
+    project: 'SSL-2DTurb'
+    group: 'Dhruvit-mae-finetune'
+    name: '0006'
+    diagnostic_logs: !!bool True
+
+    ckpt_epoch_list: [25, 50, 75, 100, 125, 150, 175, 200, 225, 250, 275, 300, 325, 350, 375, 400, 425, 450, 475, 500]
+
+    target_step: 3
+    target_step_hist: 3
+
+    train_file_range: [200000, 220000]
+    valid_file_range: [310000, 312000]
+   
+    lr: 5e-4
+    scheduler: 'ReduceLROnPlateau'
+    warmup: !!bool False
+    max_epochs: 500
+
+    num_out_frames: 1
+
+    mae_finetune: True
+    mae_finetune_fp: '/scratch/user/u.dp200518/SSL-2DTurb/MAE_PRETRAIN/0006/training_checkpoints/best_ckpt.tar'
+    freeze_layers: [] #['encoder', 'patch_embed']   
